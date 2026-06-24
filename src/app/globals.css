@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-background;
+  }
+}
+
+@layer components {
+  .stone-card {
+    @apply bg-surface-container-high rounded-xl border border-outline-variant shadow-lg relative overflow-hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+  .parchment-input {
+    @apply bg-surface-container-highest border-b border-outline/50 text-on-surface px-4 py-2 font-body-md focus:outline-none focus:border-primary transition-colors;
+  }
+  .wax-seal {
+    @apply w-8 h-8 rounded-full bg-error text-on-error flex items-center justify-center shadow-md border-2 border-error-container;
+  }
+}
+
+/* ── CURSORS ── */
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23f2ca50' stroke='%233c2f00' stroke-width='0.5' d='M20.71 4.04c.39-.39.39-1.02 0-1.41l-1.34-1.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 2.75 2.75 1.83-1.83zM3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z'/%3E%3C/svg%3E") 0 24, auto;
+}
+a, button, [role="button"], select, label[for], input[type="submit"], input[type="button"], input[type="checkbox"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23e9c349' stroke='%233c2f00' stroke-width='0.5' d='M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 19.78C7.45 20 7.21 20.1 6.97 20.1C6.72 20.1 6.46 20 6.3 19.82C6.1 19.62 6 19.34 6 19.1V3.1C6 2.64 6.3 2.24 6.74 2.07C7.18 1.9 7.68 2 8 2.32L19.18 13.5C19.5 13.82 19.6 14.32 19.42 14.76C19.25 15.2 18.84 15.5 18.38 15.5H14.94L17.12 20.24C17.35 20.74 17.14 21.34 16.64 21.56L13.64 21.97Z'/%3E%3C/svg%3E") 4 2, pointer !important;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1d1009; }
+::-webkit-scrollbar-thumb { background: #413129; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #e9c349; }
+
+/* ── ATMOSPHERIC BACKGROUND ── */
+.atmospheric-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  background: radial-gradient(ellipse at 30% 20%, #231206 0%, #0a0502 60%, #000000 100%);
+}
+.rune-overlay {
+  position: absolute; inset: 0; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='25' font-family='serif' font-size='18' fill='%23f2ca50'%3E᚛%3C/text%3E%3Ctext x='45' y='65' font-family='serif' font-size='22' fill='%23f2ca50'%3E᚜%3C/text%3E%3Ctext x='25' y='45' font-family='serif' font-size='14' fill='%23f2ca50'%3E✦%3C/text%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  animation: drift 80s linear infinite;
+}
+.dust-particle {
+  position: absolute; background: rgba(242, 202, 80, 0.35); border-radius: 50%;
+  box-shadow: 0 0 6px rgba(242, 202, 80, 0.5);
+  animation: float 18s infinite ease-in-out;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes drift {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); }
+  100% { transform: translateY(-200px) translateX(-80px) rotate(10deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.15; }
+  33% { transform: translateY(-25px) translateX(8px); opacity: 0.7; }
+  66% { transform: translateY(-10px) translateX(-8px); opacity: 0.4; }
+}
+@keyframes runeGlow {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.9; }
+}
+@keyframes candleFlicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.7; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+  75% { opacity: 0.8; transform: scale(0.98); }
+}
+@keyframes runeEruption {
+  0% { box-shadow: 0 0 0 rgba(242, 202, 80, 0); }
+  30% { box-shadow: 0 0 30px rgba(242, 202, 80, 0.6), 0 0 60px rgba(242, 202, 80, 0.3); }
+  100% { box-shadow: 0 0 0 rgba(242, 202, 80, 0); }
+}
+@keyframes screenShake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-6px) rotate(-0.5deg); }
+  20% { transform: translateX(6px) rotate(0.5deg); }
+  30% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  50% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes goldBurn {
+  0% { opacity: 1; transform: scaleY(1); filter: brightness(1); }
+  50% { opacity: 0.8; transform: scaleY(0.95) scaleX(1.02); filter: brightness(1.5) sepia(1) hue-rotate(10deg); }
+  100% { opacity: 0; transform: scaleY(0) scaleX(1.1); filter: brightness(2); }
+}
+
+/* ── UTILITY CLASSES ── */
+.animated-runes { animation: runeGlow 4s infinite ease-in-out; }
+.candle-flicker { animation: candleFlicker 3s infinite ease-in-out; }
+.rune-eruption { animation: runeEruption 1.5s ease-out; }
+.screen-shake { animation: screenShake 0.6s ease-out; }
+.animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+.animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+.gold-burn { animation: goldBurn 0.8s ease-out forwards; }
+
+.gold-glow { text-shadow: 0 0 10px rgba(242,202,80,0.6), 0 0 20px rgba(242,202,80,0.3); }
+.magical-glow { filter: drop-shadow(0 0 8px rgba(242, 202, 80, 0.4)); }
+.magical-glow-active { filter: drop-shadow(0 0 15px rgba(242, 202, 80, 0.8)); }
+.stone-inset { box-shadow: inset 0px 3px 6px rgba(0,0,0,0.5), inset 0px -1px 2px rgba(255,255,255,0.04); }
+.rune-button-glow {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), 0 0 12px rgba(212,175,55,0.3);
+  transition: all 0.3s ease;
+}
+.rune-button-glow:hover {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.25), 0 0 25px rgba(212,175,55,0.7);
+  transform: translateY(-1px);
+}
+.mana-bar-vial { box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.08); }
+.stone-tablet {
+  background: linear-gradient(145deg, #36271e, #2a1d15);
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,0.04), inset -2px -2px 5px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.7);
+  border: 1px solid #4d4635;
+}
+.parchment-texture {
+  background-image: radial-gradient(circle at center, rgba(38,25,17,0.8) 0%, rgba(23,11,5,0.95) 100%);
+}
+.noise-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+}
