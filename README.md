@@ -124,14 +124,13 @@ http://localhost:3000
 
 ---
 
-## 📸 Screenshots
+## 🚀 Future Enhancements
 
-Coming Soon
+- Real-time collaboration
+- Advanced analytics
+- Multi-currency support
+- Mobile application
 
 ---
 
-## 👥 Team Cryptix
-
-Built by Team Cryptix.
-
-*"Every coin has a story. Every expedition leaves a legacy."*
+Developed as an independent full-stack project exploring expense management through immersive fantasy-inspired design.."*
