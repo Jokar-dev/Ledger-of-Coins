@@ -8,15 +8,11 @@ export default async function OraclePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: expenses } = await supabase
-    .from('personal_expenses')
-    .select('amount, category, created_at, description')
-    .order('created_at', { ascending: false })
-
-  const { data: expeditions } = await supabase
-    .from('shared_groups')
-    .select('id, group_name, destination')
-    .eq('created_by', user.id)
+  // Parallelize independent queries
+  const [{ data: expenses }, { data: expeditions }] = await Promise.all([
+    supabase.from('personal_expenses').select('amount, category, created_at, description').order('created_at', { ascending: false }),
+    supabase.from('shared_groups').select('id, group_name, destination').eq('created_by', user.id)
+  ])
 
   // Monthly aggregation
   const monthlyMap: Record<string, number> = {}

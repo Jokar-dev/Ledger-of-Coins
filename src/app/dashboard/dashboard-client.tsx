@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import ExportLedgerButton from '@/components/export-ledger-button'
+import { formatFullTimestamp } from '@/lib/timestamp-utils'
 
 const CATEGORY_ICONS: Record<string, string> = {
   Food: '🍖', Transport: '🐎', Entertainment: '🎭', Shopping: '💎',
@@ -125,7 +126,7 @@ export default function DashboardClient({
                       <span className="text-[18px]">{CATEGORY_ICONS[e.category] || '📜'}</span>
                       <div>
                         <p className="font-body-md text-[14px] text-on-surface">{e.description}</p>
-                        <p className="font-label-sm text-[10px] text-outline uppercase">{e.category} · {new Date(e.created_at).toLocaleDateString()}</p>
+                        <p className="font-label-sm text-[10px] text-outline uppercase">{e.category} · {formatFullTimestamp(e.created_at)}</p>
                       </div>
                     </div>
                     <span className="font-headline-lg text-[15px] text-error">-{Number(e.amount).toFixed(0)}G</span>

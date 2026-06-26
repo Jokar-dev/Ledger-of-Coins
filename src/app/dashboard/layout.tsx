@@ -76,6 +76,7 @@ export default function DashboardLayout({
     { name: 'Hall of Records', href: '/dashboard', icon: 'account_balance' },
     { name: 'Treasury Ledger', href: '/dashboard/expenses', icon: 'receipt_long' },
     { name: 'Expeditions', href: '/dashboard/groups', icon: 'explore' },
+    { name: 'Chronicles', href: '/dashboard/chronicles', icon: 'history_edu' },
     { name: 'Oracle Chamber', href: '/dashboard/oracle', icon: 'auto_awesome' },
     { name: 'Relic Vault', href: '/dashboard/relics', icon: 'diamond' },
   ]
@@ -83,6 +84,7 @@ export default function DashboardLayout({
   const NOTIFICATIONS: { id: number; icon: string; color: string; text: string; time: string }[] = []
 
   const getBackgroundStyle = (path: string) => {
+    if (path.includes('/chronicles')) return 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=2074&auto=format&fit=crop'
     if (path.includes('/expenses')) return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2064&auto=format&fit=crop'
     if (path.includes('/groups')) return 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop'
     if (path.includes('/oracle')) return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2068&auto=format&fit=crop'
@@ -243,9 +245,9 @@ export default function DashboardLayout({
                       ))}
                     </div>
                     <div className="p-3 border-t border-outline-variant/50">
-                      <button className="w-full text-center font-label-sm text-[11px] text-primary uppercase tracking-widest hover:text-primary-fixed transition-colors">
+                      <Link href="/dashboard/chronicles" onClick={() => setShowNotifPanel(false)} className="block w-full text-center font-label-sm text-[11px] text-primary uppercase tracking-widest hover:text-primary-fixed transition-colors">
                         View All Chronicles
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 )}

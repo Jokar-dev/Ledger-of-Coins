@@ -59,7 +59,7 @@ CREATE TABLE public.shared_groups (
 CREATE TABLE public.group_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   group_id UUID NOT NULL REFERENCES public.shared_groups(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   role TEXT DEFAULT 'Member' CHECK (role IN ('Leader', 'Treasurer', 'Scout', 'Member')),
   member_name TEXT,
   member_email TEXT,
@@ -113,6 +113,16 @@ CREATE TABLE public.achievements (
   UNIQUE(user_id, achievement_key)
 );
 
+-- Table: public.chronicles
+CREATE TABLE public.chronicles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  category TEXT DEFAULT 'Adventure',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 
 -- ── 3. ENABLE RLS ON ALL TABLES ────────────────────────────────
 
@@ -124,6 +134,7 @@ ALTER TABLE public.group_expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.relics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.debt_scrolls ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chronicles ENABLE ROW LEVEL SECURITY;
 
 
 -- ── 4. SECURITY DEFINER FUNCTIONS (BREAKS RECURSION LOOPS) ─────
@@ -187,6 +198,9 @@ CREATE POLICY "Settle debt scrolls" ON public.debt_scrolls FOR UPDATE USING (aut
 
 -- Achievements
 CREATE POLICY "Manage own achievements" ON public.achievements FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Chronicles
+CREATE POLICY "Manage own chronicles" ON public.chronicles FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 
 -- ── 6. AUTHENTICATION TRIGGER ──────────────────────────────────

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { createExpedition, musterMember, deleteExpedition } from './actions'
+import { createExpedition, musterMember, deleteExpedition, recordGroupExpense, removeMember, updateMemberRole } from './actions'
+import { formatExpenseDate, formatExpenseTime } from '@/lib/timestamp-utils'
 
 const ROLES = ['Leader', 'Treasurer', 'Scout', 'Member']
 const EXP_ICONS = ['castle', 'forest', 'water_drop', 'account_balance', 'diamond', 'auto_awesome']
@@ -11,12 +12,16 @@ export default function GroupsClient({
   expeditions, currentUserId,
 }: { expeditions: any[]; currentUserId: string }) {
   const [allExp, setAllExp] = useState(expeditions)
-  const [modal, setModal] = useState<null | 'forge' | 'muster'>(null)
+  const [modal, setModal] = useState<null | 'forge' | 'muster' | 'ledger' | 'record'>(null)
+  const [activeExpedition, setActiveExpedition] = useState<any>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [expenseDesc, setExpenseDesc] = useState('')
+  const [expenseAmount, setExpenseAmount] = useState('')
+
   useEffect(() => {
-    setAllExp(expeditions)
+    setAllExp(prev => JSON.stringify(prev) === JSON.stringify(expeditions) ? prev : expeditions)
   }, [expeditions])
 
   const [forgeName, setForgeName] = useState('')
@@ -31,7 +36,26 @@ export default function GroupsClient({
   const [musterEmail, setMusterEmail] = useState('')
   const [musterRole, setMusterRole] = useState('Member')
 
-  const closeModal = () => { setModal(null); setErrorMsg('') }
+  const closeModal = () => { setModal(null); setErrorMsg(''); setExpenseDesc(''); setExpenseAmount('') }
+
+  const handleRecordExpense = async () => {
+    if (!activeExpedition || !expenseDesc || !expenseAmount) { setErrorMsg('All fields required'); return }
+    setIsSubmitting(true); setErrorMsg('')
+    const fd = new FormData()
+    fd.append('group_id', activeExpedition.id)
+    fd.append('description', expenseDesc)
+    fd.append('amount', expenseAmount)
+    const result = await recordGroupExpense(fd)
+    if (result.success && result.expense) {
+      const newExp = { ...result.expense, users: { explorer_name: 'You' }, created_at: result.expense.created_at || new Date().toISOString() }
+      const updatedList = [newExp, ...(activeExpedition.recentExpenses || [])]
+      const newTotal = activeExpedition.totalSpent + parseFloat(expenseAmount)
+      setActiveExpedition({ ...activeExpedition, totalSpent: newTotal, recentExpenses: updatedList })
+      setAllExp(prev => prev.map(e => e.id === activeExpedition.id ? { ...e, totalSpent: newTotal, recentExpenses: updatedList } : e))
+      setExpenseDesc(''); setExpenseAmount(''); setModal('ledger')
+    } else setErrorMsg(result.error || 'Failed to record expense')
+    setIsSubmitting(false)
+  }
 
   const handleForge = async () => {
     if (!forgeName.trim()) { setErrorMsg('Expedition name is required'); return }
@@ -56,12 +80,13 @@ export default function GroupsClient({
     fd.append('group_id', musterExpId); fd.append('member_name', musterName)
     fd.append('member_email', musterEmail); fd.append('role', musterRole)
     const result = await musterMember(fd)
-    if (result.success) {
+    if (result.success && result.member) {
       setAllExp(prev => prev.map(exp => exp.id === musterExpId ? ({
         ...exp,
+        members: [...(exp.members || []), result.member],
         memberCount: (exp.memberCount || 1) + 1
       }) : exp))
-      setMusterName(''); setMusterEmail(''); setMusterRole('Member'); closeModal()
+      setMusterName(''); setMusterEmail(''); setMusterRole('Member')
     } else setErrorMsg(result.error || 'Failed to muster member')
     setIsSubmitting(false)
   }
@@ -111,11 +136,11 @@ export default function GroupsClient({
       {/* MUSTER MODAL */}
       {modal === 'muster' && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={closeModal}>
-          <div className="relative bg-surface-container-high border border-secondary/40 rounded-xl p-5 sm:p-6 w-full max-w-md shadow-[0_0_60px_rgba(74,225,131,0.1)] max-h-[90vh] overflow-y-auto my-auto" onClick={e => e.stopPropagation()}>
-            <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-secondary m-3" />
-            <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-secondary m-3" />
-            <h3 className="font-display-lg text-[22px] sm:text-[24px] text-secondary text-center mb-1">Muster New Party</h3>
-            <p className="text-center text-on-surface-variant text-sm mb-5">Send a Raven Invitation to an adventurer.</p>
+          <div className="relative bg-surface-container-high border border-secondary/40 rounded-xl p-5 sm:p-6 w-full max-w-xl shadow-[0_0_60px_rgba(74,225,131,0.1)] max-h-[90vh] overflow-y-auto my-auto" onClick={e => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-secondary m-3 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-secondary m-3 pointer-events-none" />
+            <h3 className="font-display-lg text-[22px] sm:text-[24px] text-secondary text-center mb-1">Muster & Party Roster</h3>
+            <p className="text-center text-on-surface-variant text-sm mb-5">Manage thy brave companions and invite new adventurers.</p>
             {errorMsg && <div className="mb-4 p-3 rounded bg-error/20 border border-error/40 text-on-error-container text-sm">{errorMsg}</div>}
             {allExp.length === 0 ? (
               <div className="text-center py-6 text-on-surface-variant/60">
@@ -123,34 +148,174 @@ export default function GroupsClient({
                 <button onClick={() => { setModal('forge'); setErrorMsg('') }} className="mt-3 text-primary text-xs uppercase tracking-widest hover:text-primary-fixed">Forge Expedition →</button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div><label className={labelCls}>Select Expedition *</label>
                   <select className={inputCls} value={musterExpId} onChange={e => setMusterExpId(e.target.value)} style={{ colorScheme: 'dark' }}>
                     <option value="" style={{ background: '#2a1d15' }}>— Choose Expedition —</option>
                     {allExp.map(exp => <option key={exp.id} value={exp.id} style={{ background: '#2a1d15' }}>{exp.group_name}</option>)}
                   </select>
                 </div>
-                <div><label className={labelCls}>Adventurer Name *</label><input className={inputCls} placeholder="e.g., Rowan Stormcaller" value={musterName} onChange={e => setMusterName(e.target.value)} /></div>
-                <div><label className={labelCls}>Email Address *</label><input className={inputCls} type="email" placeholder="rowan@guild.net" value={musterEmail} onChange={e => setMusterEmail(e.target.value)} /></div>
-                <div><label className={labelCls}>Role in Party</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {ROLES.map(role => (
-                      <button key={role} type="button" onClick={() => setMusterRole(role)}
-                        className={`py-2 px-3 rounded border text-sm uppercase tracking-wider transition-all ${musterRole === role ? 'border-secondary bg-secondary/20 text-secondary' : 'border-outline-variant text-on-surface-variant hover:border-secondary/50'}`}>
-                        {role}
-                      </button>
-                    ))}
+
+                {musterExpId && (() => {
+                  const selExp = allExp.find(e => e.id === musterExpId)
+                  if (!selExp) return null
+                  return (
+                    <div className="border border-outline-variant/40 rounded-lg p-4 bg-surface-container/50">
+                      <h4 className="font-label-sm text-[11px] text-secondary uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">groups</span> Current Party Roster ({selExp.members?.length || 1})
+                      </h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {(!selExp.members || selExp.members.length === 0) ? (
+                          <p className="text-xs text-on-surface-variant/60 italic p-2 text-center">No companions listed yet.</p>
+                        ) : selExp.members.map((m: any, idx: number) => (
+                          <div key={m.id || idx} className="flex items-center justify-between p-2.5 rounded bg-surface-container-high border border-outline-variant/30 text-xs">
+                            <div className="min-w-0 pr-2">
+                              <span className="font-medium text-on-surface block truncate">{m.member_name}</span>
+                              <span className="text-[10px] text-outline block truncate">{m.member_email}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <select 
+                                value={m.role || 'Member'} 
+                                onChange={async (e) => {
+                                  const newRole = e.target.value;
+                                  setAllExp(prev => prev.map(exp => exp.id === selExp.id ? ({
+                                    ...exp,
+                                    members: exp.members.map((mem: any) => mem.id === m.id ? { ...mem, role: newRole } : mem)
+                                  }) : exp));
+                                  if (m.id) await updateMemberRole(m.id, newRole);
+                                }}
+                                className="bg-surface-container text-secondary text-[10px] rounded px-1.5 py-1 border border-secondary/30 focus:outline-none"
+                                style={{ colorScheme: 'dark' }}
+                              >
+                                {ROLES.map(r => <option key={r} value={r} style={{ background: '#2a1d15' }}>{r}</option>)}
+                              </select>
+                              {m.role !== 'Leader' && (
+                                <button 
+                                  type="button"
+                                  onClick={async () => {
+                                    if (!confirm(`Dismiss ${m.member_name} from this expedition?`)) return;
+                                    setAllExp(prev => prev.map(exp => exp.id === selExp.id ? ({
+                                      ...exp,
+                                      members: exp.members.filter((mem: any) => mem.id !== m.id),
+                                      memberCount: Math.max(1, (exp.memberCount || 1) - 1)
+                                    }) : exp));
+                                    if (m.id) await removeMember(m.id, selExp.id);
+                                  }}
+                                  className="text-outline hover:text-error transition-colors p-1"
+                                  title="Dismiss adventurer"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">person_remove</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                <div className="border-t border-outline-variant/30 pt-4">
+                  <h4 className="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-widest mb-3">Invite New Adventurer</h4>
+                  <div className="space-y-3">
+                    <div><label className={labelCls}>Adventurer Name *</label><input className={inputCls} placeholder="e.g., Rowan Stormcaller" value={musterName} onChange={e => setMusterName(e.target.value)} /></div>
+                    <div><label className={labelCls}>Email Address *</label><input className={inputCls} type="email" placeholder="rowan@guild.net" value={musterEmail} onChange={e => setMusterEmail(e.target.value)} /></div>
+                    <div><label className={labelCls}>Role in Party</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {ROLES.map(role => (
+                          <button key={role} type="button" onClick={() => setMusterRole(role)}
+                            className={`py-2 px-3 rounded border text-xs uppercase tracking-wider transition-all ${musterRole === role ? 'border-secondary bg-secondary/20 text-secondary font-medium' : 'border-outline-variant text-on-surface-variant hover:border-secondary/50'}`}>
+                            {role}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
+
                 <div className="flex gap-3 pt-2">
-                  <button onClick={closeModal} className="flex-1 py-3 rounded border border-outline-variant text-on-surface-variant text-xs uppercase tracking-widest hover:bg-surface-container transition-colors">Cancel</button>
-                  <button onClick={handleMuster} disabled={isSubmitting} className="flex-1 py-3 rounded bg-secondary/10 border border-secondary/50 text-secondary text-xs uppercase tracking-widest hover:bg-secondary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                  <button onClick={closeModal} className="flex-1 py-3 rounded border border-outline-variant text-on-surface-variant text-xs uppercase tracking-widest hover:bg-surface-container transition-colors">Done</button>
+                  <button onClick={handleMuster} disabled={isSubmitting || !musterExpId} className="flex-1 py-3 rounded bg-secondary/10 border border-secondary/50 text-secondary text-xs uppercase tracking-widest hover:bg-secondary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined text-[15px]">send</span>
-                    {isSubmitting ? 'Sending...' : 'Send Raven'}
+                    {isSubmitting ? 'Mustering...' : 'Muster Adventurer'}
                   </button>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* LEDGER MODAL */}
+      {modal === 'ledger' && activeExpedition && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={closeModal}>
+          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-5 sm:p-6 w-full max-w-lg shadow-[0_0_60px_rgba(242,202,80,0.1)] max-h-[90vh] overflow-hidden my-auto flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-outline-variant/40 pb-3">
+              <div>
+                <h3 className="font-display-lg text-xl text-primary-fixed gold-glow">📜 {activeExpedition.group_name} Ledger</h3>
+                <p className="text-[11px] text-on-surface-variant font-label-sm uppercase tracking-widest">Total Spent: {activeExpedition.totalSpent.toFixed(0)} G</p>
+              </div>
+              <button onClick={() => { setModal('record'); setErrorMsg('') }}
+                className="bg-primary text-on-primary px-3 py-1.5 rounded text-[10px] font-label-sm uppercase tracking-widest hover:bg-primary-fixed transition-colors flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">add</span> Record Expense
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 divide-y divide-outline-variant/20 min-h-[150px] my-4">
+              {(!activeExpedition.recentExpenses || activeExpedition.recentExpenses.length === 0) ? (
+                <div className="py-12 text-center text-on-surface-variant/60">
+                  <p className="text-3xl mb-2">📜</p>
+                  <p className="text-sm">No expenses recorded in this expedition yet.</p>
+                </div>
+              ) : (
+                activeExpedition.recentExpenses.map((exp: any, idx: number) => (
+                  <div key={exp.id || idx} className="pt-2.5 pb-1 flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-headline-lg text-sm text-on-surface break-words">{exp.description}</p>
+                      <div className="text-[10px] font-label-sm text-on-surface-variant/80 space-y-0.5 mt-0.5">
+                        <p className="text-secondary/90 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">person</span> Paid by {exp.users?.explorer_name || exp.users?.name || 'Explorer'}
+                        </p>
+                        <p className="text-[#d4af37]/80 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">calendar_month</span> {formatExpenseDate(exp.created_at)}
+                        </p>
+                        <p className="text-[#d4af37]/60 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">schedule</span> {formatExpenseTime(exp.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-display-lg text-base text-error font-bold shrink-0">-{Number(exp.amount).toFixed(2)}G</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <button onClick={closeModal} className="w-full py-2.5 rounded border border-outline-variant text-on-surface-variant text-xs font-label-sm uppercase tracking-widest hover:bg-surface-container transition-colors mt-auto">Close Ledger</button>
+          </div>
+        </div>
+      )}
+
+      {/* RECORD MODAL */}
+      {modal === 'record' && activeExpedition && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={closeModal}>
+          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-5 sm:p-6 w-full max-w-md shadow-[0_0_60px_rgba(242,202,80,0.1)] my-auto space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-display-lg text-xl text-primary-fixed gold-glow">Add Gold to {activeExpedition.group_name}</h3>
+            {errorMsg && <div className="mb-4 p-3 rounded bg-error/20 border border-error/40 text-on-error-container text-sm">{errorMsg}</div>}
+            <div>
+              <label className="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-widest block mb-1">Expense Description</label>
+              <input value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} placeholder="e.g., Tavern Feast" className="w-full bg-surface-container-highest border border-outline-variant rounded p-3 text-on-surface text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-widest block mb-1">Amount (Gold)</label>
+              <input value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} type="number" step="0.01" min="0.01" placeholder="0.00" className="w-full bg-surface-container-highest border border-outline-variant rounded p-3 text-on-surface text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => { setModal('ledger'); setErrorMsg('') }} className="flex-1 py-3 rounded border border-outline-variant text-on-surface-variant text-xs font-label-sm uppercase tracking-widest hover:bg-surface-container transition-colors">Back to Ledger</button>
+              <button onClick={handleRecordExpense} disabled={isSubmitting} className="flex-1 py-3 rounded bg-primary/10 border border-primary/50 text-primary text-xs font-label-sm uppercase tracking-widest hover:bg-primary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined text-[15px]">edit_document</span>
+                {isSubmitting ? 'Recording...' : 'Record Gold'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -241,6 +406,22 @@ export default function GroupsClient({
                   {/* Party bar */}
                   <div className="mt-3 w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
                     <div className="h-full bg-primary/40 rounded-full" style={{ width: `${Math.min(100, (exp.memberCount / (exp.party_size || 6)) * 100)}%` }} />
+                  </div>
+
+                  <div className="flex gap-1.5 mt-4 pt-3 border-t border-outline-variant/30 relative z-20">
+                    <button onClick={() => { setActiveExpedition(exp); setModal('ledger'); setErrorMsg('') }}
+                      className="flex-1 py-2 px-1 rounded bg-primary/10 border border-primary/40 text-primary font-label-sm text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-primary/20 transition-all flex items-center justify-center gap-1 shrink-0">
+                      <span className="material-symbols-outlined text-[14px]">receipt_long</span> Ledger
+                    </button>
+                    <button onClick={() => { setActiveExpedition(exp); setModal('record'); setErrorMsg('') }}
+                      className="flex-1 py-2 px-1 rounded bg-secondary/10 border border-secondary/40 text-secondary font-label-sm text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-secondary/20 transition-all flex items-center justify-center gap-1 shrink-0">
+                      <span className="material-symbols-outlined text-[14px]">add_circle</span> Gold
+                    </button>
+                    <button onClick={() => { setMusterExpId(exp.id); setModal('muster'); setErrorMsg('') }}
+                      className="flex-1 py-2 px-1 rounded bg-tertiary/10 border border-tertiary/40 text-tertiary font-label-sm text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-tertiary/20 transition-all flex items-center justify-center gap-1 shrink-0"
+                      title="View & Muster Party Roster">
+                      <span className="material-symbols-outlined text-[14px]">groups</span> Party
+                    </button>
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-center" />

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { addExpense, deleteExpense } from './actions'
 import { Trash2 } from 'lucide-react'
 import ExportLedgerButton from '@/components/export-ledger-button'
+import { formatExpenseDate, formatExpenseTime } from '@/lib/timestamp-utils'
 
 const CATEGORIES = [
   { name: 'Tavern & Inn', value: 'tavern', icon: 'restaurant', emoji: '🍖' },
@@ -18,11 +19,15 @@ const CATEGORIES = [
 type SpendingEvent = null | 'wise' | 'spirits' | 'merchant' | 'legendary'
 
 export default function ExpensesClient({
-  initialExpenses, currentUserId, exportData
+  initialExpenses, currentUserId, exportData, explorerName
 }: {
-  initialExpenses: any[], currentUserId: string, exportData?: any
+  initialExpenses: any[], currentUserId: string, exportData?: any, explorerName?: string
 }) {
   const [expenses, setExpenses] = useState(initialExpenses)
+
+  useEffect(() => {
+    setExpenses(prev => JSON.stringify(prev) === JSON.stringify(initialExpenses) ? prev : initialExpenses)
+  }, [initialExpenses])
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState(CATEGORIES[0].value)
@@ -50,7 +55,7 @@ export default function ExpensesClient({
     try {
       const result = await addExpense(fd)
       if (result.success && result.expense) {
-        setExpenses([result.expense, ...expenses])
+        setExpenses([{ ...result.expense, created_at: result.expense.created_at || new Date().toISOString() }, ...expenses])
         triggerEvent(parseFloat(amount))
         setDescription(''); setAmount('')
       } else setErrorMsg(result.error || 'Failed to add expense.')
@@ -98,21 +103,11 @@ export default function ExpensesClient({
       )}
       {spendingEvent === 'legendary' && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setSpendingEvent(null)}>
-          <div className="relative bg-surface-container-lowest border-2 border-primary rounded-2xl p-10 max-w-md w-full text-center rune-eruption shadow-[0_0_80px_rgba(242,202,80,0.4)]">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary m-3" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary m-3" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary m-3" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary m-3" />
-            <p className="text-[56px] mb-2">⚡</p>
-            <p className="font-label-sm text-[11px] text-primary uppercase tracking-[0.3em] mb-3">The Ancient Accountant Awakens</p>
-            <h2 className="font-display-lg text-[28px] text-primary-fixed gold-glow leading-tight mb-4">
-              YOU HAVE AWAKENED<br />THE ANCIENT ACCOUNTANT
-            </h2>
-            <p className="text-on-surface-variant italic mb-4">&ldquo;A legendary expense of titanic proportions hath been recorded in the eternal scrolls.&rdquo;</p>
-            <div className="inline-block bg-primary/20 border border-primary/50 rounded-full px-4 py-1 font-label-sm text-[11px] text-primary uppercase tracking-widest">
-              🔥 Reckless Spender Achievement Unlocked
-            </div>
-            <p className="text-[10px] text-outline mt-4">Click anywhere to dismiss</p>
+          <div className="bg-surface-container-high border border-primary rounded-2xl p-8 max-w-md text-center animate-fade-up shadow-[0_0_80px_rgba(242,202,80,0.3)]">
+            <p className="text-[64px] mb-3">👑</p>
+            <h3 className="font-display-lg text-[28px] text-primary-fixed gold-glow mb-2">LEGENDARY SPENDING</h3>
+            <p className="text-on-surface-variant text-sm mb-4">&ldquo;The Chronicles shall speak of this transaction for a thousand years.&rdquo;</p>
+            <button className="bg-primary text-on-primary px-6 py-2.5 rounded text-xs font-label-sm uppercase tracking-widest hover:bg-primary-fixed transition-colors">Bow Before The Gold</button>
           </div>
         </div>
       )}
@@ -126,7 +121,7 @@ export default function ExpensesClient({
         {exportData && <ExportLedgerButton data={exportData} variant="primary" />}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+      <div className="max-w-[1920px] mx-auto grid grid-cols-1 xl:grid-cols-3 gap-8 items-start min-w-0">
         {/* New Entry Form */}
         <div className="xl:col-span-1 bg-surface-container-high border border-outline-variant rounded-xl p-5 sm:p-6 h-fit relative overflow-hidden">
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary-container m-2 opacity-50" />
@@ -195,18 +190,29 @@ export default function ExpensesClient({
                     ? 'border-primary bg-surface-container-lowest shadow-[0_0_20px_rgba(242,202,80,0.15)]'
                     : 'border-outline-variant/50 bg-surface-container-low/60 hover:border-primary/20'
                 }`}>
-                <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border text-[18px] shrink-0 ${isLegendary ? 'border-primary/50 bg-surface shadow-[0_0_8px_rgba(242,202,80,0.2)]' : 'border-outline-variant bg-surface-container'}`}>
+                <div className="flex items-start sm:items-center gap-3 min-w-0 w-full sm:w-auto">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border text-[18px] shrink-0 mt-1 sm:mt-0 ${isLegendary ? 'border-primary/50 bg-surface shadow-[0_0_8px_rgba(242,202,80,0.2)]' : 'border-outline-variant bg-surface-container'}`}>
                     {cat.emoji}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className={`font-headline-lg text-[16px] sm:text-[17px] break-words ${isLegendary ? 'text-primary-fixed gold-glow' : 'text-on-surface group-hover:text-primary-fixed transition-colors'}`}>
                       {expense.description}
                     </p>
-                    <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest truncate">
-                      {cat.name} · {new Date(expense.created_at).toLocaleDateString()}
-                      {isLegendary && <span className="text-primary ml-2">⚠ Legendary</span>}
-                    </p>
+                    <div className="text-[11px] font-label-sm space-y-0.5 mt-1 text-on-surface-variant/80">
+                      <p className="flex items-center gap-1.5 text-secondary/90">
+                        <span className="material-symbols-outlined text-[13px]">person</span> Paid by {explorerName || 'You'}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-on-surface-variant">
+                        <span className="material-symbols-outlined text-[13px]">category</span> Category: {cat.name}
+                        {isLegendary && <span className="text-primary ml-1">⚠ Legendary</span>}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[#d4af37]/80 pt-0.5">
+                        <span className="material-symbols-outlined text-[13px]">calendar_month</span> {formatExpenseDate(expense.created_at)}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[#d4af37]/60">
+                        <span className="material-symbols-outlined text-[13px]">schedule</span> {formatExpenseTime(expense.created_at)}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-outline-variant/20 shrink-0">

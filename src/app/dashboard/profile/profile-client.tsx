@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { updateProfile } from './actions'
+import { formatFullTimestamp } from '@/lib/timestamp-utils'
 
 const ACHIEVEMENT_INFO: Record<string, { name: string, icon: string, desc: string }> = {
   first_expense: { name: 'First Blood', icon: '🩸', desc: 'Recorded thy first expense.' },
@@ -13,9 +14,9 @@ const ACHIEVEMENT_INFO: Record<string, { name: string, icon: string, desc: strin
 }
 
 export default function ProfileClient({
-  user, profile, achievements, stats
+  user, profile, achievements, stats, recentActivity
 }: {
-  user: any, profile: any, achievements: any[], stats: { expeditions: number, totalGold: number }
+  user: any, profile: any, achievements: any[], stats: { expeditions: number, totalGold: number }, recentActivity?: any[]
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -205,6 +206,23 @@ export default function ProfileClient({
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Recent Chronicle Activity */}
+          {!isEditing && recentActivity && recentActivity.length > 0 && (
+            <div className="bg-surface-container border border-outline-variant rounded-xl p-6 mt-6">
+              <h3 className="font-headline-lg text-[18px] text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">history</span> Recent Chronicle Activity
+              </h3>
+              <div className="divide-y divide-outline-variant/20 space-y-2.5">
+                {recentActivity.map((act, idx) => (
+                  <div key={idx} className="pt-2.5 pb-1 flex items-center justify-between gap-4">
+                    <p className="font-body-md text-sm text-on-surface">Added &ldquo;<span className="text-primary font-medium">{act.description}</span>&rdquo;</p>
+                    <span className="font-label-sm text-[11px] text-[#d4af37]/80 shrink-0">{formatFullTimestamp(act.created_at)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

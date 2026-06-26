@@ -165,3 +165,26 @@ BEGIN
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ── 7. CHRONICLES TABLE & MANUAL MUSTER FIX ─────────────────
+
+CREATE TABLE IF NOT EXISTS public.chronicles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  category TEXT DEFAULT 'Adventure',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.chronicles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users manage own chronicles" ON public.chronicles;
+CREATE POLICY "Users manage own chronicles"
+  ON public.chronicles FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Make group_members.user_id nullable for manual travel companions
+ALTER TABLE public.group_members ALTER COLUMN user_id DROP NOT NULL;
+

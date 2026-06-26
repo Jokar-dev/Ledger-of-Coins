@@ -14,21 +14,40 @@ export default async function GroupsPage() {
     .eq('created_by', user.id)
     .order('created_at', { ascending: false })
 
-  // Enrich each expedition with member count, gold spent, debt scroll count
-  const enriched = await Promise.all((expeditions || []).map(async (exp) => {
-    const { count: memberCount } = await supabase
-      .from('group_members').select('*', { count: 'exact', head: true }).eq('group_id', exp.id)
+  const expList = expeditions || []
+  if (expList.length === 0) {
+    return <GroupsClient expeditions={[]} currentUserId={user.id} />
+  }
 
-    const { data: expData } = await supabase
-      .from('group_expenses').select('amount').eq('group_id', exp.id)
-    const totalSpent = expData?.reduce((s, e) => s + Number(e.amount), 0) || 0
+  const expIds = expList.map(e => e.id)
 
-    const { count: debtCount } = await supabase
-      .from('debt_scrolls').select('*', { count: 'exact', head: true })
-      .eq('group_id', exp.id).eq('settled', false)
+  // Batch fetch all members, expenses, and debts in 3 parallel queries (O(1) network trips instead of O(3N))
+  const [membersRes, expDataRes, debtRes] = await Promise.all([
+    supabase.from('group_members').select('*').in('group_id', expIds),
+    supabase.from('group_expenses').select('*, users:paid_by(explorer_name, name, email)').in('group_id', expIds).order('created_at', { ascending: false }),
+    supabase.from('debt_scrolls').select('group_id').in('group_id', expIds).eq('settled', false)
+  ])
 
-    return { ...exp, memberCount: memberCount || 1, totalSpent, debtCount: debtCount || 0 }
-  }))
+  const allMembers = membersRes.data || []
+  const allExpenses = expDataRes.data || []
+  const allDebts = debtRes.data || []
+
+  // Map data in memory in O(N)
+  const enriched = expList.map((exp) => {
+    const members = allMembers.filter(m => m.group_id === exp.id)
+    const recentExpenses = allExpenses.filter(e => e.group_id === exp.id)
+    const totalSpent = recentExpenses.reduce((s, e) => s + Number(e.amount), 0)
+    const debtCount = allDebts.filter(d => d.group_id === exp.id).length
+
+    return {
+      ...exp,
+      members,
+      memberCount: members.length || 1,
+      totalSpent,
+      debtCount,
+      recentExpenses
+    }
+  })
 
   return <GroupsClient expeditions={enriched} currentUserId={user.id} />
 }
