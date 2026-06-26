@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createExpedition, musterMember, deleteExpedition } from './actions'
 
@@ -14,6 +14,10 @@ export default function GroupsClient({
   const [modal, setModal] = useState<null | 'forge' | 'muster'>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    setAllExp(expeditions)
+  }, [expeditions])
 
   const [forgeName, setForgeName] = useState('')
   const [forgeDest, setForgeDest] = useState('')
@@ -53,6 +57,10 @@ export default function GroupsClient({
     fd.append('member_email', musterEmail); fd.append('role', musterRole)
     const result = await musterMember(fd)
     if (result.success) {
+      setAllExp(prev => prev.map(exp => exp.id === musterExpId ? ({
+        ...exp,
+        memberCount: (exp.memberCount || 1) + 1
+      }) : exp))
       setMusterName(''); setMusterEmail(''); setMusterRole('Member'); closeModal()
     } else setErrorMsg(result.error || 'Failed to muster member')
     setIsSubmitting(false)

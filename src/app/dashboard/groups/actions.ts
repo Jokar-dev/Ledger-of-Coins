@@ -50,21 +50,55 @@ export async function musterMember(formData: FormData) {
 
   if (!group_id || !member_name || !member_email) return { success: false, error: 'All fields required' }
 
-  // Check if member email matches an existing user
+  const emailClean = member_email.trim()
+
+  // 1. Check if an adventurer with this exact email is already mustered in this party
+  const { data: existingByEmail } = await supabase
+    .from('group_members')
+    .select('id')
+    .eq('group_id', group_id)
+    .ilike('member_email', emailClean)
+    .maybeSingle()
+
+  if (existingByEmail) {
+    return { success: false, error: 'An adventurer with this raven email address is already mustered in this party!' }
+  }
+
+  // 2. Check if member email matches an existing registered user
   const { data: existingUser } = await supabase
-    .from('users').select('id').eq('email', member_email).single()
+    .from('users').select('id').eq('email', emailClean).maybeSingle()
+
+  if (!existingUser?.id) {
+    return { 
+      success: false, 
+      error: 'That adventurer has not awakened their Chronicle yet! Ask them to register an account on Ledger of Lost Kingdoms before inviting them.' 
+    }
+  }
+
+  // 3. Check if this user UUID is already in the party (e.g. Leader)
+  const { data: existingById } = await supabase
+    .from('group_members')
+    .select('id')
+    .eq('group_id', group_id)
+    .eq('user_id', existingUser.id)
+    .maybeSingle()
+
+  if (existingById) {
+    return { success: false, error: 'This adventurer is already mustered in this expedition!' }
+  }
 
   const { data: member, error } = await supabase.from('group_members').insert({
     group_id,
-    user_id: existingUser?.id || user.id, // fallback to inviter if not found
+    user_id: existingUser.id,
     role: role || 'Member',
-    member_name,
-    member_email,
+    member_name: member_name.trim(),
+    member_email: emailClean,
   }).select().single()
 
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/dashboard/groups')
+  revalidatePath('/dashboard')
   return { success: true, member }
 }
 
