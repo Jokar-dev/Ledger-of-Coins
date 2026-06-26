@@ -72,18 +72,18 @@ export default function GroupsClient({
     <>
       {/* FORGE MODAL */}
       {modal === 'forge' && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={closeModal}>
-          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-6 w-full max-w-lg shadow-[0_0_60px_rgba(242,202,80,0.15)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={closeModal}>
+          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-5 sm:p-6 w-full max-w-lg shadow-[0_0_60px_rgba(242,202,80,0.15)] max-h-[90vh] overflow-y-auto my-auto" onClick={e => e.stopPropagation()}>
             <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-primary m-3" />
             <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-primary m-3" />
-            <h3 className="font-display-lg text-[24px] text-primary-fixed gold-glow text-center mb-1">Forge New Expedition</h3>
+            <h3 className="font-display-lg text-[22px] sm:text-[24px] text-primary-fixed gold-glow text-center mb-1">Forge New Expedition</h3>
             <p className="text-center text-on-surface-variant text-sm mb-5">Chart thy course into the unknown.</p>
             {errorMsg && <div className="mb-4 p-3 rounded bg-error/20 border border-error/40 text-on-error-container text-sm">{errorMsg}</div>}
             <div className="space-y-4">
               <div><label className={labelCls}>Expedition Name *</label><input className={inputCls} placeholder="e.g., Lost City of Aurelia" value={forgeName} onChange={e => setForgeName(e.target.value)} /></div>
               <div><label className={labelCls}>Destination</label><input className={inputCls} placeholder="e.g., Sunken Desert Kingdom" value={forgeDest} onChange={e => setForgeDest(e.target.value)} /></div>
               <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={2} placeholder="Describe the quest..." value={forgeDesc} onChange={e => setForgeDesc(e.target.value)} /></div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div><label className={labelCls}>Party Size</label><input className={inputCls} type="number" min={1} max={20} value={forgeSize} onChange={e => setForgeSize(e.target.value)} /></div>
                 <div><label className={labelCls}>Start Date</label><input className={inputCls} type="date" value={forgeStart} onChange={e => setForgeStart(e.target.value)} style={{ colorScheme: 'dark' }} /></div>
                 <div><label className={labelCls}>End Date</label><input className={inputCls} type="date" value={forgeEnd} onChange={e => setForgeEnd(e.target.value)} style={{ colorScheme: 'dark' }} /></div>
@@ -102,11 +102,11 @@ export default function GroupsClient({
 
       {/* MUSTER MODAL */}
       {modal === 'muster' && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={closeModal}>
-          <div className="relative bg-surface-container-high border border-secondary/40 rounded-xl p-6 w-full max-w-md shadow-[0_0_60px_rgba(74,225,131,0.1)]" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={closeModal}>
+          <div className="relative bg-surface-container-high border border-secondary/40 rounded-xl p-5 sm:p-6 w-full max-w-md shadow-[0_0_60px_rgba(74,225,131,0.1)] max-h-[90vh] overflow-y-auto my-auto" onClick={e => e.stopPropagation()}>
             <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-secondary m-3" />
             <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-secondary m-3" />
-            <h3 className="font-display-lg text-[24px] text-secondary text-center mb-1">Muster New Party</h3>
+            <h3 className="font-display-lg text-[22px] sm:text-[24px] text-secondary text-center mb-1">Muster New Party</h3>
             <p className="text-center text-on-surface-variant text-sm mb-5">Send a Raven Invitation to an adventurer.</p>
             {errorMsg && <div className="mb-4 p-3 rounded bg-error/20 border border-error/40 text-on-error-container text-sm">{errorMsg}</div>}
             {allExp.length === 0 ? (
@@ -147,11 +147,11 @@ export default function GroupsClient({
         </div>
       )}
 
-      <div className="flex-1 p-6 md:p-8 w-full pb-32">
+      <div className="flex-1 p-4 sm:p-6 lg:p-10 max-w-[1920px] mx-auto w-full pb-32 min-w-0">
         {/* Header — ONE forge button only */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
           <div>
-            <h2 className="font-display-lg text-[40px] text-on-background gold-glow">Expeditions</h2>
+            <h2 className="font-display-lg text-[32px] sm:text-[40px] text-on-background gold-glow break-words">Expeditions</h2>
             <p className="text-on-surface-variant mt-1 text-sm">Manage thy active quests and their brave parties.</p>
           </div>
           <div className="flex gap-3 flex-wrap">
@@ -168,7 +168,7 @@ export default function GroupsClient({
 
         {/* Empty State */}
         {allExp.length === 0 ? (
-          <div className="text-center py-24 bg-surface-container border border-outline-variant/30 rounded-xl">
+          <div className="text-center py-24 bg-surface-container border border-outline-variant/30 rounded-xl px-4">
             <p className="text-[56px] mb-4">🗺</p>
             <h3 className="font-headline-lg text-[22px] text-on-surface-variant mb-2">No Expeditions Have Been Forged Yet</h3>
             <p className="text-on-surface-variant/60 text-sm mb-6">The world awaits thy brave ventures.</p>
@@ -178,7 +178,7 @@ export default function GroupsClient({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
             {allExp.map((exp, i) => (
               <div key={exp.id} className="bg-surface-container-high rounded-xl border border-outline-variant p-5 relative overflow-hidden group hover:border-primary/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(242,202,80,0.08)]">
                 <div className="absolute inset-0 opacity-[0.04] bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-y9IG0slkqgYqX93eOThNhzWJsLNIPqkeI3oORaepV_hdWfEhG3u3SA-8Kwm0Jygv1yuv5uSuxsJKqxi_ADv34f59EjA-jz8CJC-2DA0dpPFhE8qOgjuposfzD1DpreT5blzMCZ8HJY596BXr1LjD_vLzjJCGohdys_O9XdKGovpgo2G8m6EVmYiyG6hFWCQkhO6sNaTN2jCbYtrnFxO_PR-dm_-qwWQVElBtHy-1QriW5YQ9gwsEsaZQNtEOA6S4rgox0oTVJEi1')" }} />

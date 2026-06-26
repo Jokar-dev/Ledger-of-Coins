@@ -91,11 +91,11 @@ export default function RelicsClient({
     <>
       {/* Add Relic Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={() => { setShowForm(false); setErrorMsg('') }}>
-          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-6 w-full max-w-md shadow-[0_0_60px_rgba(242,202,80,0.15)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => { setShowForm(false); setErrorMsg('') }}>
+          <div className="relative bg-surface-container-high border border-primary/40 rounded-xl p-5 sm:p-6 w-full max-w-md shadow-[0_0_60px_rgba(242,202,80,0.15)] max-h-[90vh] overflow-y-auto my-auto" onClick={e => e.stopPropagation()}>
             <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-primary m-3" />
             <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-primary m-3" />
-            <h3 className="font-display-lg text-[24px] text-primary-fixed gold-glow text-center mb-1">Catalogue a Relic</h3>
+            <h3 className="font-display-lg text-[22px] sm:text-[24px] text-primary-fixed gold-glow text-center mb-1">Catalogue a Relic</h3>
             <p className="text-center text-on-surface-variant text-sm mb-5">Record a discovery for the Vault.</p>
             {errorMsg && <div className="mb-4 p-3 rounded bg-error/20 border border-error/40 text-on-error-container text-sm">{errorMsg}</div>}
             <div className="space-y-4">
@@ -140,18 +140,18 @@ export default function RelicsClient({
         </div>
       )}
 
-      <div className="flex-1 p-6 md:p-8 w-full pb-32">
+      <div className="flex-1 p-4 sm:p-6 lg:p-10 max-w-[1920px] mx-auto w-full pb-32 min-w-0">
         {/* Header Tabs */}
-        <div className="flex border-b border-outline-variant mb-8 w-full">
+        <div className="flex flex-wrap border-b border-outline-variant mb-8 w-full">
           <button 
-            className={`pb-4 px-6 font-headline-lg uppercase tracking-widest text-sm transition-all relative ${activeTab === 'vault' ? 'text-primary gold-glow' : 'text-on-surface-variant hover:text-on-surface'}`}
+            className={`pb-4 px-4 sm:px-6 font-headline-lg uppercase tracking-widest text-xs sm:text-sm transition-all relative ${activeTab === 'vault' ? 'text-primary gold-glow' : 'text-on-surface-variant hover:text-on-surface'}`}
             onClick={() => setActiveTab('vault')}
           >
             🏺 Relic Vault
             {activeTab === 'vault' && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-primary shadow-glow" />}
           </button>
           <button 
-            className={`pb-4 px-6 font-headline-lg uppercase tracking-widest text-sm transition-all relative ${activeTab === 'deeds' ? 'text-primary gold-glow' : 'text-on-surface-variant hover:text-on-surface'}`}
+            className={`pb-4 px-4 sm:px-6 font-headline-lg uppercase tracking-widest text-xs sm:text-sm transition-all relative ${activeTab === 'deeds' ? 'text-primary gold-glow' : 'text-on-surface-variant hover:text-on-surface'}`}
             onClick={() => setActiveTab('deeds')}
           >
             📜 Hall of Deeds
@@ -161,16 +161,16 @@ export default function RelicsClient({
 
         {activeTab === 'vault' ? (
           <>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <p className="text-on-surface-variant text-sm">A collection of treasures recovered across thy expeditions.</p>
               <button onClick={() => { setShowForm(true); setErrorMsg('') }}
-                className="bg-primary/10 border border-primary/50 text-primary px-5 py-2.5 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-primary/20 hover:shadow-glow transition-all">
+                className="bg-primary/10 border border-primary/50 text-primary px-5 py-2.5 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-primary/20 hover:shadow-glow transition-all shrink-0">
                 <span className="material-symbols-outlined text-[15px]">add</span> Catalogue Relic
               </button>
             </div>
         {/* Empty State */}
         {allRelics.length === 0 ? (
-          <div className="text-center py-24 bg-surface-container border border-outline-variant/30 rounded-xl">
+          <div className="text-center py-24 bg-surface-container border border-outline-variant/30 rounded-xl px-4">
             <p className="text-[56px] mb-4">🏺</p>
             <h3 className="font-headline-lg text-[22px] text-on-surface-variant mb-2">No Relics Have Been Discovered Yet</h3>
             <p className="text-on-surface-variant/60 text-sm mb-6">Add treasures recovered on your expeditions.</p>
@@ -182,7 +182,7 @@ export default function RelicsClient({
         ) : (
           <>
             {/* Vault Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               <div className="bg-surface-container-high border border-outline-variant rounded-xl p-4">
                 <p className="text-[28px] mb-1">🏺</p>
                 <p className="font-display-lg text-[24px] text-primary">{allRelics.length}</p>
@@ -190,12 +190,12 @@ export default function RelicsClient({
               </div>
               <div className="bg-surface-container-high border border-outline-variant rounded-xl p-4">
                 <p className="text-[28px] mb-1">💰</p>
-                <p className="font-display-lg text-[24px] text-primary">
+                <p className="font-display-lg text-[24px] text-primary break-words">
                   {allRelics.reduce((s, r) => s + Number(r.estimated_value || 0), 0).toFixed(0)} G
                 </p>
                 <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest">Total Vault Value</p>
               </div>
-              <div className="bg-surface-container-high border border-outline-variant rounded-xl p-4 col-span-2 md:col-span-1">
+              <div className="bg-surface-container-high border border-outline-variant rounded-xl p-4 sm:col-span-2 lg:col-span-1">
                 <p className="text-[28px] mb-1">⭐</p>
                 <p className="font-headline-lg text-[18px] text-primary truncate">
                   {allRelics.sort((a, b) => Number(b.estimated_value) - Number(a.estimated_value))[0]?.display_name || allRelics[0]?.name || '—'}
@@ -205,7 +205,7 @@ export default function RelicsClient({
             </div>
 
             {/* Relic Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
               {allRelics.map((relic) => {
                 const rarity = rarityByValue(Number(relic.estimated_value || 0))
                 const border = RARITY_BORDERS[rarity]
@@ -292,7 +292,7 @@ export default function RelicsClient({
               <p className="text-on-surface-variant text-sm">You have unlocked {unlockedKeys.size} of {totalAchievements} total deeds.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
               {ACHIEVEMENT_LIST.map(ach => {
                 const isUnlocked = unlockedKeys.has(ach.id)
                 const unlockData = unlockedAchievements.find(a => a.achievement_key === ach.id)

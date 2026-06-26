@@ -19,37 +19,37 @@ export default function OracleClient({
   const totalCat = categories.reduce((s, [, v]) => s + v, 0) || 1
 
   return (
-    <div className="flex-1 p-6 md:p-8 w-full pb-32 space-y-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 max-w-[1920px] mx-auto w-full pb-32 space-y-8 min-w-0">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-3 mb-3">
-          <span className="text-[40px]">🔮</span>
-          <h2 className="font-display-lg text-[40px] text-primary-fixed gold-glow">Oracle Chamber</h2>
-          <span className="text-[40px]">🔮</span>
+        <div className="inline-flex items-center justify-center gap-2 sm:gap-3 mb-3 flex-wrap">
+          <span className="text-[32px] sm:text-[40px]">🔮</span>
+          <h2 className="font-display-lg text-[32px] sm:text-[40px] text-primary-fixed gold-glow break-words">Oracle Chamber</h2>
+          <span className="text-[32px] sm:text-[40px]">🔮</span>
         </div>
-        <p className="text-on-surface-variant">The Oracle Foresees thy financial destiny.</p>
+        <p className="text-on-surface-variant text-sm sm:text-base">The Oracle Foresees thy financial destiny.</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-surface-container-high border border-primary/30 rounded-xl p-5 text-center shadow-[0_0_20px_rgba(242,202,80,0.08)]">
           <p className="text-4xl mb-2">💰</p>
-          <p className="font-display-lg text-[28px] text-primary gold-glow">{totalSpent.toFixed(0)} G</p>
+          <p className="font-display-lg text-[28px] text-primary gold-glow break-all">{totalSpent.toFixed(0)} G</p>
           <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Total Gold Lost</p>
         </div>
         <div className="bg-surface-container-high border border-secondary/30 rounded-xl p-5 text-center">
           <p className="text-4xl mb-2">{CATEGORY_ICONS[topCategory[0]] || '📜'}</p>
-          <p className="font-headline-lg text-[20px] text-secondary">{topCategory[0]}</p>
+          <p className="font-headline-lg text-[20px] text-secondary truncate">{topCategory[0]}</p>
           <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Most Gold Lost To</p>
         </div>
-        <div className="bg-surface-container-high border border-tertiary/30 rounded-xl p-5 text-center col-span-2 md:col-span-1">
+        <div className="bg-surface-container-high border border-tertiary/30 rounded-xl p-5 text-center sm:col-span-2 lg:col-span-1">
           <p className="text-4xl mb-2">🗺</p>
           <p className="font-headline-lg text-[20px] text-tertiary">{expeditions.length}</p>
           <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Active Expeditions</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         {/* Monthly Trend — Bar Chart (SVG-based) */}
         <div className="bg-surface-container-high border border-outline-variant rounded-xl p-6">
           <h3 className="font-headline-lg text-[18px] text-primary-fixed mb-5 flex items-center gap-2">

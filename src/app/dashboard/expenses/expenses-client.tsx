@@ -118,17 +118,17 @@ export default function ExpensesClient({
       )}
 
       {/* Page Header */}
-      <div className="flex justify-between items-end border-b border-outline-variant pb-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-outline-variant pb-4 mb-8">
         <div>
-          <h2 className="font-display-lg text-[40px] text-primary-fixed gold-glow">Treasury Ledger</h2>
+          <h2 className="font-display-lg text-[32px] sm:text-[40px] text-primary-fixed gold-glow break-words">Treasury Ledger</h2>
           <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-widest uppercase">Record Thy Journey&apos;s Toll</p>
         </div>
         {exportData && <ExportLedgerButton data={exportData} variant="primary" />}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* New Entry Form */}
-        <div className="lg:col-span-1 bg-surface-container-high border border-outline-variant rounded-xl p-6 h-fit relative overflow-hidden">
+        <div className="xl:col-span-1 bg-surface-container-high border border-outline-variant rounded-xl p-5 sm:p-6 h-fit relative overflow-hidden">
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary-container m-2 opacity-50" />
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary-container m-2 opacity-50" />
           <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary-container m-2 opacity-50" />
@@ -168,7 +168,7 @@ export default function ExpensesClient({
               </select>
             </div>
             <button onClick={handleSubmit} disabled={isSubmitting}
-              className="w-full mt-4 py-3 rounded bg-primary/10 border border-primary/50 text-primary font-label-sm text-[11px] uppercase tracking-widest hover:bg-primary/20 hover:shadow-glow transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-4 py-3 min-h-[44px] rounded bg-primary/10 border border-primary/50 text-primary font-label-sm text-[11px] uppercase tracking-widest hover:bg-primary/20 hover:shadow-glow transition-all disabled:opacity-50 flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-[16px]">{isSubmitting ? 'hourglass_empty' : 'edit_document'}</span>
               {isSubmitting ? 'Recording...' : 'Record Expense'}
             </button>
@@ -176,9 +176,9 @@ export default function ExpensesClient({
         </div>
 
         {/* Ledger List */}
-        <div className="lg:col-span-2 space-y-3">
+        <div className="xl:col-span-2 space-y-3 min-w-0">
           {expenses.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 text-center bg-surface-container border border-outline-variant/30 rounded-xl">
+            <div className="flex flex-col items-center justify-center py-24 text-center bg-surface-container border border-outline-variant/30 rounded-xl px-4">
               <p className="text-[56px] mb-4">📜</p>
               <h3 className="font-headline-lg text-[22px] text-on-surface-variant mb-2">The Treasury Is Empty</h3>
               <p className="text-on-surface-variant/60 text-sm mb-6">No gold hath been recorded in the ledger.</p>
@@ -190,30 +190,30 @@ export default function ExpensesClient({
             const cat = getCat(expense.category)
             return (
               <div key={expense.id}
-                className={`border rounded-xl p-4 flex items-center justify-between group transition-all ${
+                className={`border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group transition-all ${
                   isLegendary
                     ? 'border-primary bg-surface-container-lowest shadow-[0_0_20px_rgba(242,202,80,0.15)]'
                     : 'border-outline-variant/50 bg-surface-container-low/60 hover:border-primary/20'
                 }`}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border text-[18px] shrink-0 ${isLegendary ? 'border-primary/50 bg-surface shadow-[0_0_8px_rgba(242,202,80,0.2)]' : 'border-outline-variant bg-surface-container'}`}>
                     {cat.emoji}
                   </div>
-                  <div>
-                    <p className={`font-headline-lg text-[17px] ${isLegendary ? 'text-primary-fixed gold-glow' : 'text-on-surface group-hover:text-primary-fixed transition-colors'}`}>
+                  <div className="min-w-0 flex-1">
+                    <p className={`font-headline-lg text-[16px] sm:text-[17px] break-words ${isLegendary ? 'text-primary-fixed gold-glow' : 'text-on-surface group-hover:text-primary-fixed transition-colors'}`}>
                       {expense.description}
                     </p>
-                    <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest">
+                    <p className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest truncate">
                       {cat.name} · {new Date(expense.created_at).toLocaleDateString()}
                       {isLegendary && <span className="text-primary ml-2">⚠ Legendary</span>}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`font-display-lg text-[20px] ${isLegendary ? 'text-primary-fixed gold-glow' : 'text-error'}`}>
+                <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-outline-variant/20 shrink-0">
+                  <span className={`font-display-lg text-[18px] sm:text-[20px] ${isLegendary ? 'text-primary-fixed gold-glow' : 'text-error'}`}>
                     -{Number(expense.amount).toFixed(2)}G
                   </span>
-                  <button onClick={() => handleDelete(expense.id)} className="text-error/40 hover:text-error transition-colors p-1">
+                  <button onClick={() => handleDelete(expense.id)} className="text-error/40 hover:text-error transition-colors p-2 -mr-2" aria-label="Delete expense">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>

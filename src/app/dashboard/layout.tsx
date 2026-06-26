@@ -23,6 +23,7 @@ export default function DashboardLayout({
   const [avatarUrl, setAvatarUrl] = useState('')
   const [showNotifPanel, setShowNotifPanel] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -81,24 +82,38 @@ export default function DashboardLayout({
 
   const NOTIFICATIONS: { id: number; icon: string; color: string; text: string; time: string }[] = []
 
+  const getBackgroundStyle = (path: string) => {
+    if (path.includes('/expenses')) return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2064&auto=format&fit=crop'
+    if (path.includes('/groups')) return 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop'
+    if (path.includes('/oracle')) return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2068&auto=format&fit=crop'
+    if (path.includes('/relics')) return 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=2070&auto=format&fit=crop'
+    if (path.includes('/profile')) return 'https://images.unsplash.com/photo-1507842286343-583d248b18f4?q=80&w=2070&auto=format&fit=crop'
+    return 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=2070&auto=format&fit=crop'
+  }
+
   return (
     <AchievementProvider>
       <TourProvider>
       <div className="bg-background text-on-background font-body-md min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container">
-        {/* Atmospheric Background */}
+        {/* Atmospheric Themed Background */}
         <div className="atmospheric-bg">
-        <div className="rune-overlay" />
-        <div className="dust-particle w-1 h-1 top-[10%] left-[20%]" style={{ animationDelay: '0s' }} />
-        <div className="dust-particle w-1.5 h-1.5 top-[30%] left-[70%]" style={{ animationDelay: '-3s' }} />
-        <div className="dust-particle w-0.5 h-0.5 top-[60%] left-[40%]" style={{ animationDelay: '-7s' }} />
-        <div className="dust-particle w-2 h-2 top-[80%] left-[85%]" style={{ animationDelay: '-11s' }} />
-        <div className="dust-particle w-1 h-1 top-[50%] left-[10%]" style={{ animationDelay: '-14s' }} />
-      </div>
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out opacity-30 scale-105 filter contrast-125 saturate-150"
+            style={{ backgroundImage: `url(${getBackgroundStyle(pathname)})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0e0704] via-[#160d07]/85 to-[#0e0704]/90" />
+          <div className="rune-overlay" />
+          <div className="dust-particle w-1 h-1 top-[10%] left-[20%]" style={{ animationDelay: '0s' }} />
+          <div className="dust-particle w-1.5 h-1.5 top-[30%] left-[70%]" style={{ animationDelay: '-3s' }} />
+          <div className="dust-particle w-0.5 h-0.5 top-[60%] left-[40%]" style={{ animationDelay: '-7s' }} />
+          <div className="dust-particle w-2 h-2 top-[80%] left-[85%]" style={{ animationDelay: '-11s' }} />
+          <div className="dust-particle w-1 h-1 top-[50%] left-[10%]" style={{ animationDelay: '-14s' }} />
+        </div>
 
-      <div className="flex h-screen relative z-10 max-w-[1440px] mx-auto shadow-[0_0_50px_rgba(0,0,0,0.8)] border-x border-outline-variant/20">
+      <div className="flex h-screen relative z-10 w-full max-w-[1920px] mx-auto shadow-[0_0_50px_rgba(0,0,0,0.8)] border-x border-outline-variant/20 overflow-hidden">
         
         {/* SideNavBar */}
-        <nav className="hidden md:flex flex-col fixed left-[calc(50%-720px)] top-0 h-full w-64 border-r border-outline-variant bg-surface-container-high shadow-[inset_-10px_0_20px_rgba(0,0,0,0.5),0_0_15px_rgba(0,0,0,0.8)] py-stone-margin z-40">
+        <nav className="hidden md:flex flex-col fixed left-[max(0px,calc(50%-960px))] top-0 h-full w-64 xl:w-72 border-r border-outline-variant bg-surface-container-high shadow-[inset_-10px_0_20px_rgba(0,0,0,0.5),0_0_15px_rgba(0,0,0,0.8)] py-stone-margin z-40">
           <div className="px-container-padding mb-stone-margin">
             <h1 className="font-display-lg text-headline-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(233,195,73,0.5)]">Ledger of Lost Kingdoms</h1>
           </div>
@@ -132,11 +147,66 @@ export default function DashboardLayout({
           </div>
         </nav>
 
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden flex pointer-events-auto">
+            {/* Backdrop */}
+            <div
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            />
+            {/* Drawer Content */}
+            <div className="relative w-72 max-w-[85vw] h-full bg-[#2D231E] border-r-2 border-primary/40 shadow-[0_0_40px_rgba(0,0,0,0.9)] flex flex-col py-6 z-10">
+              <div className="px-6 flex items-center justify-between mb-6 pb-4 border-b border-primary/20 shrink-0">
+                <h1 className="font-display-lg text-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(233,195,73,0.5)] leading-tight">Ledger of Lost Kingdoms</h1>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-on-surface-variant hover:text-primary p-1">
+                  <span className="material-symbols-outlined text-[24px]">close</span>
+                </button>
+              </div>
+
+              <div className="flex-1 flex flex-col gap-1 px-3 overflow-y-auto">
+                {NAV_ITEMS.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                  const tourId = item.href === '/dashboard' ? 'tour-dashboard' : `tour-${item.href.split('/').pop()}`
+                  return isActive ? (
+                    <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)} data-tour={tourId} className="flex items-center gap-3 text-primary font-bold bg-primary-container/20 border-l-4 border-primary px-4 py-3 shadow-[0_0_12px_rgba(242,202,80,0.2)] rounded-r-lg transition-all">
+                      <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>{item.icon}</span>
+                      <span className="font-body-md text-sm">{item.name}</span>
+                    </Link>
+                  ) : (
+                    <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)} data-tour={tourId} className="flex items-center gap-3 text-on-surface-variant px-4 py-3 opacity-70 hover:opacity-100 hover:bg-surface-container-highest hover:text-primary transition-all duration-200 rounded-lg border-l-4 border-transparent">
+                      <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                      <span className="font-body-md text-sm">{item.name}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+
+              <div className="px-4 mt-auto pt-4 border-t border-outline-variant/20 shrink-0">
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                  className="w-full py-3 bg-surface border border-outline-variant/50 text-on-surface-variant rounded hover:bg-surface-bright hover:border-error hover:text-error transition-all flex items-center justify-center gap-2 text-xs tracking-widest uppercase font-bold"
+                >
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content Area */}
-        <main className="flex-1 flex flex-col md:ml-64 w-full h-full relative overflow-y-auto scroll-smooth">
+        <main className="flex-1 flex flex-col md:ml-64 xl:ml-72 w-full min-w-0 h-full relative overflow-y-auto scroll-smooth">
           {/* TopAppBar */}
           <header className="flex justify-between items-center w-full px-container-padding h-16 bg-surface-container-low/90 backdrop-blur-md border-b border-outline-variant/30 shadow-md sticky top-0 z-30">
-            <div className="md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2 text-primary hover:bg-surface-variant rounded-lg transition-colors flex items-center justify-center -ml-1"
+                aria-label="Open navigation menu"
+              >
+                <span className="material-symbols-outlined text-[26px]">menu</span>
+              </button>
               <h2 className="font-display-lg text-headline-lg-mobile text-primary tracking-widest">Ledger</h2>
             </div>
             <div className="hidden md:block" />

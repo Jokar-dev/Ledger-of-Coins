@@ -71,24 +71,24 @@ export default function ProfileClient({
   const labelCls = "block font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest mb-1.5"
 
   return (
-    <div className="flex-1 p-6 md:p-8 w-full max-w-[1000px] mx-auto pb-32 space-y-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-10 w-full max-w-[1400px] mx-auto pb-32 space-y-8 min-w-0">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-outline-variant pb-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-outline-variant pb-4 mb-8">
         <div>
-          <h2 className="font-display-lg text-[40px] text-primary-fixed gold-glow">Explorer Profile</h2>
+          <h2 className="font-display-lg text-[32px] sm:text-[40px] text-primary-fixed gold-glow break-words">Explorer Profile</h2>
           <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-widest uppercase">Thy Identity in the Realm</p>
         </div>
         {!isEditing && (
-          <button onClick={() => setIsEditing(true)} className="bg-primary/10 border border-primary/50 text-primary px-5 py-2.5 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-primary/20 hover:shadow-glow transition-all">
+          <button onClick={() => setIsEditing(true)} className="bg-primary/10 border border-primary/50 text-primary px-5 py-2.5 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-primary/20 hover:shadow-glow transition-all shrink-0">
             <span className="material-symbols-outlined text-[15px]">edit</span> Edit Profile
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Left Column: Avatar & Quick Stats */}
         <div className="space-y-6">
-          <div className="bg-surface-container-high border border-outline-variant rounded-xl p-6 text-center relative overflow-hidden">
+          <div className="bg-surface-container-high border border-outline-variant rounded-xl p-5 sm:p-6 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 m-2" />
             <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 m-2" />
             
@@ -110,8 +110,8 @@ export default function ProfileClient({
               )}
             </div>
 
-            <h3 className="font-display-lg text-[24px] text-primary-fixed gold-glow leading-tight">{formData.explorer_name}</h3>
-            <p className="text-on-surface-variant text-sm mt-1 mb-4">{user.email}</p>
+            <h3 className="font-display-lg text-[24px] text-primary-fixed gold-glow leading-tight break-words">{formData.explorer_name}</h3>
+            <p className="text-on-surface-variant text-sm mt-1 mb-4 break-all">{user.email}</p>
 
             <div className="flex items-center justify-center gap-2 text-sm text-outline mb-4">
               <span className="material-symbols-outlined text-[16px]">location_on</span>
@@ -132,9 +132,9 @@ export default function ProfileClient({
         </div>
 
         {/* Right Column: Details & Achievements */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="xl:col-span-2 space-y-6 min-w-0">
           {/* Profile Details */}
-          <div className="bg-surface-container border border-outline-variant rounded-xl p-6 relative overflow-hidden">
+          <div className="bg-surface-container border border-outline-variant rounded-xl p-5 sm:p-6 relative overflow-hidden">
             <h3 className="font-headline-lg text-[18px] text-on-surface-variant uppercase tracking-widest mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">menu_book</span> Chronicle Information
             </h3>
@@ -143,16 +143,16 @@ export default function ProfileClient({
 
             {isEditing ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div><label className={labelCls}>True Name</label><input className={inputCls} value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))} /></div>
                   <div><label className={labelCls}>Explorer Title</label><input className={inputCls} value={formData.explorer_name} onChange={e => setFormData(p => ({...p, explorer_name: e.target.value}))} /></div>
-                  <div className="md:col-span-2"><label className={labelCls}>Chronicle Name</label><input className={inputCls} value={formData.chronicle_name} onChange={e => setFormData(p => ({...p, chronicle_name: e.target.value}))} /></div>
-                  <div className="md:col-span-2"><label className={labelCls}>Location</label><input className={inputCls} value={formData.location} onChange={e => setFormData(p => ({...p, location: e.target.value}))} /></div>
-                  <div className="md:col-span-2"><label className={labelCls}>Biography</label><textarea className={`${inputCls} resize-none`} rows={4} value={formData.bio} onChange={e => setFormData(p => ({...p, bio: e.target.value}))} /></div>
+                  <div className="sm:col-span-2"><label className={labelCls}>Chronicle Name</label><input className={inputCls} value={formData.chronicle_name} onChange={e => setFormData(p => ({...p, chronicle_name: e.target.value}))} /></div>
+                  <div className="sm:col-span-2"><label className={labelCls}>Location</label><input className={inputCls} value={formData.location} onChange={e => setFormData(p => ({...p, location: e.target.value}))} /></div>
+                  <div className="sm:col-span-2"><label className={labelCls}>Biography</label><textarea className={`${inputCls} resize-none`} rows={4} value={formData.bio} onChange={e => setFormData(p => ({...p, bio: e.target.value}))} /></div>
                 </div>
-                <div className="flex gap-3 pt-4 border-t border-outline-variant/30">
-                  <button onClick={() => setIsEditing(false)} className="px-6 py-2.5 rounded border border-outline-variant text-on-surface-variant text-xs uppercase tracking-widest hover:bg-surface-container transition-colors">Cancel</button>
-                  <button onClick={handleSave} disabled={isSubmitting} className="px-6 py-2.5 rounded bg-primary/10 border border-primary/50 text-primary text-xs uppercase tracking-widest hover:bg-primary/20 transition-all disabled:opacity-50">
+                <div className="flex flex-wrap gap-3 pt-4 border-t border-outline-variant/30">
+                  <button onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none px-6 py-2.5 rounded border border-outline-variant text-on-surface-variant text-xs uppercase tracking-widest hover:bg-surface-container transition-colors text-center">Cancel</button>
+                  <button onClick={handleSave} disabled={isSubmitting} className="flex-1 sm:flex-none px-6 py-2.5 rounded bg-primary/10 border border-primary/50 text-primary text-xs uppercase tracking-widest hover:bg-primary/20 transition-all disabled:opacity-50 text-center">
                     {isSubmitting ? 'Saving...' : 'Save Profile'}
                   </button>
                 </div>
